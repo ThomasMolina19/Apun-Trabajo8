@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>La guerra y la paz — Panorama interactivo</title>
+  <meta name="description" content="Página interactiva en un solo archivo HTML sobre la guerra y la paz: contraste, línea temporal, conceptos clave y lecturas recomendadas." />
+  <meta name="color-scheme" content="dark light">
+  <style>
+    /* ========================
+       Diseño: archivo único
+       Autor: Senior Front-End
+       ======================== */
+    :root{
+      --bg: #0b0e14;
+      --bg-elev: #111521;
+      --panel: #141a2a;
+      --text: #e7eef8;
+      --muted: #a8b4c7;
+      --brand-war: #e74c3c;   /* rojo */
+      --brand-peace: #2ecc71; /* verde */
+      --brand: #7c5cff;       /* acento */
+      --ring: #89b4ff;
+      --ok: #20c997;
+      --warn: #ffb703;
+      --danger: #ff5f6d;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+      --radius-lg: 26px;
+      --maxw: 1200px;
+    }
+    @media (prefers-color-scheme: light){
+      :root{ --bg:#f7f8fb; --bg-elev:#ffffff; --panel:#ffffff; --text:#172133; --muted:#475569; --shadow:0 10px 25px rgba(2,12,27,.08);} 
+    }
+    [data-theme="light"]:root{ --bg:#f7f8fb; --bg-elev:#ffffff; --panel:#ffffff; --text:#172133; --muted:#475569; --shadow:0 10px 25px rgba(2,12,27,.08);} 
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+      color:var(--text); background:radial-gradient(1200px 800px at 70% -20%, rgba(124,92,255,.25), transparent 60%),
+                          radial-gradient(900px 600px at 0% 20%, rgba(46,204,113,.2), transparent 55%), var(--bg);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+    }
+    a{color:inherit; text-decoration:none}
+    a[href^="#"]:focus{outline:2px solid var(--ring); outline-offset: 3px; border-radius:12px}
+
+    /* Layout */
+    .wrap{max-width:var(--maxw); margin-inline:auto; padding: clamp(18px, 2vw, 28px);}
+    header{position:sticky; top:0; z-index:50; backdrop-filter:saturate(140%) blur(8px); background:color-mix(in srgb, var(--bg-elev) 86%, transparent); border-bottom:1px solid color-mix(in srgb, var(--muted) 20%, transparent);}
+    .bar{display:flex; gap:16px; align-items:center; justify-content:space-between}
+    .brand{display:flex; gap:12px; align-items:center; font-weight:700; letter-spacing:.3px}
+    .brand svg{width:28px; height:28px}
+    nav{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+    nav a{padding:10px 14px; border-radius:12px; color:var(--muted); font-weight:600}
+    nav a:hover, nav a[aria-current="page"]{background:color-mix(in srgb, var(--brand) 10%, transparent); color:var(--text)}
+    .btn{appearance:none; border:1px solid color-mix(in srgb, var(--muted) 22%, transparent); background:linear-gradient(180deg, color-mix(in srgb, var(--panel) 94%, transparent), color-mix(in srgb, black 6%, transparent)); color:var(--text); padding:10px 14px; border-radius:12px; display:inline-flex; gap:10px; align-items:center; cursor:pointer; font-weight:700; box-shadow:var(--shadow)}
+    .btn:hover{transform:translateY(-1px)}
+    .btn:active{transform:translateY(0)}
+    .btn[aria-pressed="true"]{outline:2px solid var(--ring)}
+
+    /* Hero */
+    .hero{display:grid; grid-template-columns: 1.05fr .95fr; gap: clamp(18px, 4vw, 28px); align-items:center; padding: clamp(22px, 6vw, 50px) 0}
+    .heroCard{position:relative; border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow); isolation:isolate}
+    .heroCard .bg{
+      position:absolute; inset:0; z-index:-1; background:
+        conic-gradient(from 200deg at 10% 100%, color-mix(in srgb, var(--brand-war) 45%, transparent), transparent 35%),
+        conic-gradient(from -10deg at 90% 0%, color-mix(in srgb, var(--brand-peace) 35%, transparent), transparent 30%),
+        radial-gradient(700px 500px at 10% 90%, color-mix(in srgb, var(--brand-war) 14%, transparent), transparent 45%),
+        radial-gradient(700px 500px at 90% 10%, color-mix(in srgb, var(--brand-peace) 14%, transparent), transparent 45%),
+        linear-gradient(180deg, color-mix(in srgb, var(--bg-elev) 82%, transparent), color-mix(in srgb, var(--panel) 90%, transparent));
+    }
+    .heroCard .content{padding: clamp(22px, 4vw, 44px)}
+    h1{font-size: clamp(28px, 6vw, 54px); line-height: 1.1; margin:0 0 12px}
+    .kicker{display:inline-block; font-weight:800; letter-spacing:.15em; text-transform:uppercase; font-size:12px; opacity:.8; margin-bottom:8px}
+    .lede{font-size:clamp(16px, 2.5vw, 20px); color:var(--muted); max-width:60ch}
+    .heroActions{display:flex; gap:10px; flex-wrap:wrap; margin-top:18px}
+    .chip{display:inline-flex; align-items:center; gap:8px; font-weight:700; padding:8px 12px; border-radius:999px; background:color-mix(in srgb, var(--bg-elev) 75%, transparent); border:1px solid color-mix(in srgb, var(--muted) 22%, transparent)}
+    .chip svg{width:16px; height:16px}
+
+    /* Split Compare */
+    .compare{position:relative; border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow);}
+    .compare .layer{padding: clamp(20px, 5vw, 40px); min-height: 340px;}
+    .compare .war{background:linear-gradient(160deg, color-mix(in srgb, var(--brand-war) 26%, var(--panel)), var(--panel));}
+    .compare .peace{position:absolute; inset:0; background:linear-gradient(20deg, color-mix(in srgb, var(--brand-peace) 24%, var(--panel)), var(--panel)); clip-path: inset(0 calc(100% - var(--pos,50%)) 0 0);}
+    .compare h3{margin:0 0 8px}
+    .compare p{margin:0 0 8px; color:var(--muted)}
+    .compare .handle{position:absolute; inset:0; pointer-events:none}
+    .compare .rule{position:absolute; top:0; bottom:0; width:2px; left:var(--pos,50%); background:color-mix(in srgb, white 35%, transparent)}
+    .compare .knob{position:absolute; top:50%; left:var(--pos,50%); transform:translate(-50%, -50%); width:40px; height:40px; border-radius:50%; background:var(--bg-elev); border:2px solid color-mix(in srgb, var(--muted) 30%, transparent); display:grid; place-items:center; box-shadow:var(--shadow)}
+    .compare input[type="range"]{position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:ew-resize}
+
+    /* Grid cards */
+    .grid{display:grid; gap: clamp(14px, 2vw, 20px)}
+    .grid.cols-2{grid-template-columns: repeat(2, minmax(0, 1fr))}
+    .grid.cols-3{grid-template-columns: repeat(3, minmax(0, 1fr))}
+    @media (max-width: 900px){ .hero{grid-template-columns:1fr} .grid.cols-3{grid-template-columns:1fr} .grid.cols-2{grid-template-columns:1fr} }
+
+    .card{background:var(--panel); border-radius:var(--radius); padding: clamp(16px, 2vw, 22px); border:1px solid color-mix(in srgb, var(--muted) 18%, transparent); box-shadow:var(--shadow)}
+    .card h3{margin:0 0 6px}
+    .card p{margin:0; color:var(--muted)}
+
+    .list{display:grid; gap:10px}
+    .list li{display:flex; gap:10px; align-items:flex-start}
+    .badge{display:inline-grid; place-items:center; width:28px; height:28px; border-radius:8px; font-weight:900}
+
+    /* Línea temporal */
+    .timeline{background:var(--panel); border-radius:var(--radius); padding:18px; border:1px solid color-mix(in srgb, var(--muted) 18%, transparent); box-shadow:var(--shadow)}
+    .timeline .row{display:grid; gap:18px; grid-template-columns: 260px 1fr; align-items:center}
+    .timeline input[type=range]{width:100%}
+    .timeline .event{background:linear-gradient(180deg, color-mix(in srgb, var(--bg-elev) 92%, transparent), color-mix(in srgb, black 6%, transparent)); border:1px solid color-mix(in srgb, var(--muted) 20%, transparent); border-radius:16px; padding:16px}
+    .timeline .event h4{margin:0 0 6px}
+    .meta{display:flex; gap:10px; flex-wrap:wrap; font-size:.9rem; color:var(--muted)}
+
+    /* Chips de conceptos */
+    .chips{display:flex; gap:8px; flex-wrap:wrap}
+    .chips button{border:1px solid color-mix(in srgb, var(--muted) 22%, transparent); background:var(--bg-elev); color:var(--text); padding:8px 12px; border-radius:999px; font-weight:700; cursor:pointer}
+    .chips button[aria-pressed="true"]{outline:2px solid var(--ring)}
+    .def-list{display:grid; gap:12px; margin-top:12px}
+    .def{border-left:4px solid color-mix(in srgb, var(--brand) 40%, transparent); padding:10px 12px; background:var(--panel); border-radius:12px}
+
+    /* Quotes */
+    blockquote{margin:0; padding:18px 18px 18px 22px; border-left:4px solid color-mix(in srgb, var(--brand-peace) 50%, transparent); background:var(--panel); border-radius:12px}
+    blockquote footer{color:var(--muted); margin-top:6px}
+
+    /* Footer */
+    footer{margin-top:40px; padding:30px 0; border-top:1px solid color-mix(in srgb, var(--muted) 18%, transparent); color:var(--muted)}
+
+    /* Print */
+    @media print{ header, .heroActions, .compare input, .compare .knob{display:none} body{background:white; color:black} .card, .timeline, .def, blockquote{box-shadow:none} }
+    
+    /* Preferencia del sistema (se aplican primero) */
+    @media (prefers-color-scheme: light){
+    :root{ 
+        --bg:#f7f8fb; --bg-elev:#ffffff; --panel:#ffffff; --text:#172133; 
+        --muted:#475569; --shadow:0 10px 25px rgba(2,12,27,.08);
+    }
+    }
+
+    /* Override manual por botón (tiene la última palabra) */
+    :root[data-theme="light"]{
+    --bg:#f7f8fb; --bg-elev:#ffffff; --panel:#ffffff; --text:#172133; 
+    --muted:#475569; --shadow:0 10px 25px rgba(2,12,27,.08);
+    }
+    :root[data-theme="dark"]{
+    --bg:#0b0e14; --bg-elev:#111521; --panel:#141a2a; --text:#e7eef8; 
+    --muted:#a8b4c7; --shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap bar" role="navigation" aria-label="Principal">
+      <div class="brand" aria-label="Marca">
+        <svg viewBox="0 0 64 64" role="img" aria-label="Símbolo de guerra y paz" focusable="false" aria-hidden="true"><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#e74c3c"/><stop offset="1" stop-color="#2ecc71"/></linearGradient></defs><circle cx="32" cy="32" r="30" fill="none" stroke="url(#g)" stroke-width="4"/><path d="M32 4 L32 60 M12 20 L32 32 L52 20" stroke="url(#g)" stroke-width="4" fill="none" stroke-linecap="round"/></svg>
+        <span>Guerra & Paz</span>
+      </div>
+      <nav>
+        <a href="#inicio" aria-current="page">Inicio</a>
+        <a href="#contrastes">Contrastes</a>
+        <a href="#linea">Línea temporal</a>
+        <a href="#conceptos">Conceptos</a>
+        <a href="#voces">Voces</a>
+        <a href="#lecturas">Lecturas</a>
+      </nav>
+      <button class="btn" id="themeBtn" aria-pressed="false" aria-label="Cambiar tema"><span>🌓</span> Tema</button>
+    </div>
+  </header>
+
+  <main id="inicio" class="wrap">
+    <section class="hero" aria-labelledby="t1">
+      <div class="heroCard">
+        <div class="bg" aria-hidden="true"></div>
+        <div class="content">
+          <span class="kicker">Explorador interactivo</span>
+          <h1 id="t1">La guerra y la paz</h1>
+          <p class="lede">Un recorrido visual y didáctico para comprender los <strong>contrastes</strong>, los <strong>momentos clave</strong> y los <strong>conceptos</strong> que han definido los conflictos y las construcciones de paz a lo largo de la historia.</p>
+          <div class="heroActions">
+            <a class="btn" href="#contrastes">Explorar contrastes</a>
+            <a class="btn" href="#linea">Ver línea temporal</a>
+            <span class="chip" title="Equilibrio temático">
+              <!-- inline SVG scales for balance -->
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v3m-7 3h14M5 10l-3 5h6l-3-5zm14 0l-3 5h6l-3-5zM2 19h20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+              Equilibrio
+            </span>
+            <span class="chip" title="Enfoque humano">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a5 5 0 100-10 5 5 0 000 10zm-7 9a7 7 0 1114 0H5z" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+              Perspectiva humana
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="compare" aria-label="Comparador Guerra / Paz">
+        <div class="layer war" aria-hidden="false">
+          <h3>Guerra</h3>
+          <p><strong>Ruptura del orden</strong>, recurso extremo para resolver disputas de poder, territorio o ideas. Conlleva costos humanos, materiales y morales.</p>
+          <ul class="list" aria-label="Rasgos de la guerra">
+            <li><span class="badge" style="background:color-mix(in srgb, var(--brand-war) 30%, transparent)">⚔️</span><div><strong>Violencia organizada</strong><br><span class="muted">Ejércitos regulares, milicias, guerra híbrida.</span></div></li>
+            <li><span class="badge" style="background:color-mix(in srgb, var(--warn) 30%, transparent)">⏳</span><div><strong>Dinámicas inciertas</strong><br><span class="muted">Escalada, desplazamientos y crisis humanitarias.</span></div></li>
+            <li><span class="badge" style="background:color-mix(in srgb, var(--danger) 30%, transparent)">💥</span><div><strong>Destrucción</strong><br><span class="muted">Infraestructura, tejido social y confianza.</span></div></li>
+          </ul>
+        </div>
+        <div class="layer peace" aria-hidden="false">
+          <h3>Paz</h3>
+          <p><strong>Transformación del conflicto</strong> mediante instituciones, justicia y reconciliación. Implica ausencia de violencia <em>y</em> presencia de condiciones de dignidad.</p>
+          <ul class="list" aria-label="Rasgos de la paz">
+            <li><span class="badge" style="background:color-mix(in srgb, var(--brand-peace) 30%, transparent)">🕊️</span><div><strong>Paz negativa</strong><br><span class="muted">Cese de hostilidades y seguridad básica.</span></div></li>
+            <li><span class="badge" style="background:color-mix(in srgb, var(--ok) 30%, transparent)">🌱</span><div><strong>Paz positiva</strong><br><span class="muted">Equidad, participación y derechos efectivos.</span></div></li>
+            <li><span class="badge" style="background:color-mix(in srgb, var(--ring) 30%, transparent)">⚖️</span><div><strong>Justicia</strong><br><span class="muted">Verdad, reparación y garantías de no repetición.</span></div></li>
+          </ul>
+        </div>
+        <div class="handle" aria-hidden="true">
+          <span class="rule"></span>
+          <span class="knob" role="presentation">↔</span>
+        </div>
+        <input id="compareRange" type="range" min="0" max="100" value="50" aria-label="Desliza para comparar guerra y paz" />
+      </div>
+    </section>
+
+    <section id="contrastes" class="grid cols-2" aria-labelledby="t2">
+      <article class="card">
+        <h3 id="t2">Causas frecuentes del conflicto</h3>
+        <p>Los conflictos armados suelen emerger de combinaciones de factores estructurales y detonantes inmediatos.</p>
+        <ul class="list" style="margin-top:10px">
+          <li><span class="badge" style="background:color-mix(in srgb, var(--warn) 30%, transparent)">🌍</span><div><strong>Territorio y recursos</strong><br><span class="muted">Disputas por fronteras, agua, energía, minerales estratégicos.</span></div></li>
+          <li><span class="badge" style="background:color-mix(in srgb, var(--brand) 30%, transparent)">🧭</span><div><strong>Poder e ideología</strong><br><span class="muted">Captura del Estado, autoritarismo, choque de visiones.</span></div></li>
+          <li><span class="badge" style="background:color-mix(in srgb, var(--danger) 30%, transparent)">🚨</span><div><strong>Eventos disparadores</strong><br><span class="muted">Crisis económicas, fraudes electorales, asesinatos políticos.</span></div></li>
+        </ul>
+      </article>
+      <article class="card">
+        <h3>Arquitectura de paz</h3>
+        <p>La paz sostenible combina mecanismos de seguridad con políticas sociales e instituciones creíbles.</p>
+        <ul class="list" style="margin-top:10px">
+          <li><span class="badge" style="background:color-mix(in srgb, var(--ok) 30%, transparent)">🤝</span><div><strong>Diálogo y negociación</strong><br><span class="muted">Alto al fuego verificable, agenda y mediación imparcial.</span></div></li>
+          <li><span class="badge" style="background:color-mix(in srgb, var(--ring) 30%, transparent)">🏛️</span><div><strong>Instituciones</strong><br><span class="muted">Estado de derecho, seguridad civil, justicia transicional.</span></div></li>
+          <li><span class="badge" style="background:color-mix(in srgb, var(--brand-peace) 30%, transparent)">📚</span><div><strong>Desarrollo y reconciliación</strong><br><span class="muted">Educación, empleo digno, memoria y reconocimiento.</span></div></li>
+        </ul>
+      </article>
+    </section>
+
+    <section id="linea" class="timeline" aria-labelledby="t3" style="margin-top:24px">
+      <div class="row">
+        <div>
+          <h3 id="t3">Línea temporal</h3>
+          <p style="color:var(--muted); margin-top:-6px">Mueve el control para ver momentos clave. Fechas históricas en formato año/fecha.</p>
+          <label for="yearRange" class="chip" style="margin-top:8px">Año seleccionado: <strong id="yearOut">1648</strong></label>
+          <input id="yearRange" type="range" min="-500" max="2025" step="1" value="1648" aria-label="Deslizador de años" />
+        </div>
+        <div class="event" aria-live="polite" id="eventBox">
+          <!-- JS llena el contenido -->
+        </div>
+      </div>
+    </section>
+
+    <section id="conceptos" class="card" aria-labelledby="t4" style="margin-top:24px">
+      <h3 id="t4">Conceptos clave</h3>
+      <div class="chips" role="group" aria-label="Filtros de conceptos">
+        <button class="chipBtn" data-tag="paz-positiva" aria-pressed="true">Paz positiva</button>
+        <button class="chipBtn" data-tag="paz-negativa" aria-pressed="true">Paz negativa</button>
+        <button class="chipBtn" data-tag="disuasion" aria-pressed="true">Disuasión</button>
+        <button class="chipBtn" data-tag="desarme" aria-pressed="true">Desarme</button>
+        <button class="chipBtn" data-tag="justicia" aria-pressed="true">Justicia transicional</button>
+        <button class="chipBtn" data-tag="reconciliacion" aria-pressed="true">Reconciliación</button>
+      </div>
+      <div class="def-list" id="defList">
+        <!-- Definiciones renderizadas por JS -->
+      </div>
+    </section>
+
+    <section id="voces" class="grid cols-3" aria-labelledby="t5" style="margin-top:24px">
+      <h3 id="t5" style="grid-column:1/-1">Voces</h3>
+      <article class="card">
+        <blockquote>
+          “La paz no es la ausencia de conflicto, es la capacidad de manejar el conflicto por medios pacíficos.”
+          <footer>— Johan Galtung</footer>
+        </blockquote>
+      </article>
+      <article class="card">
+        <blockquote>
+          “El valor supremo no es la guerra ni la victoria, sino la vida y su dignidad.”
+          <footer>— Adaptado de tradiciones pacifistas contemporáneas</footer>
+        </blockquote>
+      </article>
+      <article class="card">
+        <blockquote>
+          “Los más fuertes son los que transforman el odio en comprensión.”
+          <footer>— Inspirado en reflexiones de reconciliación</footer>
+        </blockquote>
+      </article>
+    </section>
+
+    <section id="lecturas" class="card" aria-labelledby="t6" style="margin-top:24px">
+      <h3 id="t6">Lecturas y recursos</h3>
+      <ul class="list" style="margin-top:10px">
+        <li><span class="badge" style="background:color-mix(in srgb, var(--brand) 30%, transparent)">📖</span>
+          <div><strong>Teorías de la paz</strong><br><span class="muted">Paz negativa/positiva, violencia directa, estructural y cultural.</span></div>
+        </li>
+        <li><span class="badge" style="background:color-mix(in srgb, var(--ring) 30%, transparent)">🗺️</span>
+          <div><strong>Acuerdos históricos</strong><br><span class="muted">Westfalia (1648), Carta de la ONU (1945), procesos recientes de paz y justicia transicional.</span></div>
+        </li>
+        <li><span class="badge" style="background:color-mix(in srgb, var(--ok) 30%, transparent)">🎓</span>
+          <div><strong>Construcción local de paz</strong><br><span class="muted">Experiencias comunitarias, memoria, participación y desarrollo.</span></div>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    <div>Hecho por THOMAS MOLINA MOLINA para CATEDRA APUN 50 AÑOS</div>
+    <div style="margin-top:6px">29 de octubre: <kbd>G</kbd> guerra, <kbd>P</kbd> paz</div>
+  </footer>
+
+  <script>
+    // ========================
+    // Utilidades y estado
+    // ========================
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => Array.from(el.querySelectorAll(sel));
+
+    // Tema persistente
+    const themeBtn = $('#themeBtn');
+    const saved = localStorage.getItem('theme');
+    if(saved){ document.documentElement.setAttribute('data-theme', saved); themeBtn.setAttribute('aria-pressed', saved==='light'); }
+
+    themeBtn.addEventListener('click', () => {
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = cur === 'light' ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', next);
+      themeBtn.setAttribute('aria-pressed', next==='light');
+      localStorage.setItem('theme', next);
+    });
+
+    // Deslizador de comparador
+    const cmp = $('.compare');
+    const range = $('#compareRange');
+    const setPos = (v) => { cmp.style.setProperty('--pos', v + '%'); };
+    setPos(range.value);
+    range.addEventListener('input', e => setPos(e.target.value));
+
+    // Enfoque con teclado (G/P)
+    window.addEventListener('keydown', (e)=>{
+      if(e.key.toLowerCase()==='g'){ setPos(20); range.value=20; }
+      if(e.key.toLowerCase()==='p'){ setPos(80); range.value=80; }
+      if(e.key.toLowerCase()==='t'){ themeBtn.click(); }
+    });
+
+    // Línea temporal de eventos
+    const events = [
+      {year:-490, title:'Guerras Médicas', where:'Grecia-Persia', type:'conflicto', summary:'Choque entre ciudades-estado griegas y el Imperio persa. Marca tensiones geopolíticas tempranas.'},
+      {year:1648, title:'Paz de Westfalia', where:'Europa', type:'acuerdo', summary:'Sella las Guerras de los Treinta Años y consolida el principio de soberanía estatal moderna.'},
+      {year:1789, title:'Revolución Francesa', where:'Francia', type:'coyuntura', summary:'Transformación política con guerras asociadas; redefine ciudadanía y legitimidad del poder.'},
+      {year:1914, title:'Primera Guerra Mundial', where:'Europa y más', type:'guerra', summary:'Guerra industrializada a gran escala; al término, mapa político rediseñado.'},
+      {year:1939, title:'Segunda Guerra Mundial', where:'Global', type:'guerra', summary:'Destrucción masiva y crímenes atroces; culmina en 1945 con la creación de la ONU.'},
+      {year:1945, title:'Carta de la ONU', where:'San Francisco', type:'acuerdo', summary:'Marco para la seguridad colectiva, prevención de conflictos y cooperación internacional.'},
+      {year:1989, title:'Caída del Muro de Berlín', where:'Europa', type:'coyuntura', summary:'Simbólica del fin de la Guerra Fría y reconfiguración del orden europeo.'},
+      {year:2016, title:'Acuerdo de Paz', where:'Colombia', type:'acuerdo', summary:'Acuerdo Gobierno-FARC-EP; justicia transicional, participación y desarrollo territorial.'}
+    ];
+
+    const yearRange = $('#yearRange');
+    const yearOut = $('#yearOut');
+    const eventBox = $('#eventBox');
+
+    function renderEvent(y){
+      yearOut.textContent = y >= 0 ? y : `${Math.abs(y)} a.C.`;
+      // toma el evento más cercano por año
+      const ev = events.reduce((prev, cur) => Math.abs(cur.year - y) < Math.abs(prev.year - y) ? cur : prev, events[0]);
+      const chip = ev.type === 'guerra' || ev.type === 'conflicto' ? '⚔️' : ev.type === 'acuerdo' ? '🕊️' : '📌';
+      eventBox.innerHTML = `
+        <h4>${chip} ${ev.title}</h4>
+        <div class="meta"><span><strong>Año:</strong> ${ev.year >= 0 ? ev.year : Math.abs(ev.year)+ ' a.C.'}</span><span><strong>Lugar:</strong> ${ev.where}</span><span><strong>Tipo:</strong> ${ev.type}</span></div>
+        <p style="margin-top:6px">${ev.summary}</p>
+      `;
+    }
+    renderEvent(parseInt(yearRange.value,10));
+    yearRange.addEventListener('input', e => renderEvent(parseInt(e.target.value,10)));
+
+    // Conceptos clave con filtros
+    const defs = [
+      {tag:'paz-positiva', title:'Paz positiva', text:'Condiciones que hacen sostenible la paz: instituciones justas, inclusión, derechos efectivos y oportunidades.'},
+      {tag:'paz-negativa', title:'Paz negativa', text:'Ausencia de violencia directa. Un alto al fuego estable, pero aún con desigualdades o tensiones latentes.'},
+      {tag:'disuasion', title:'Disuasión', text:'Estrategia para evitar agresiones mediante la amenaza creíble de costos inaceptables.'},
+      {tag:'desarme', title:'Desarme', text:'Reducción, control o eliminación de armamentos para disminuir riesgos y desescalar conflictos.'},
+      {tag:'justicia', title:'Justicia transicional', text:'Conjunto de mecanismos para verdad, justicia, reparación y garantías de no repetición tras conflictos.'},
+      {tag:'reconciliacion', title:'Reconciliación', text:'Procesos sociales y simbólicos para reconstruir confianza entre víctimas, excombatientes y sociedad.'}
+    ];
+
+    const defList = $('#defList');
+    const chipBtns = $$('.chipBtn');
+
+    function renderDefs(){
+      const active = new Set(chipBtns.filter(b=>b.getAttribute('aria-pressed')==='true').map(b=>b.dataset.tag));
+      const items = defs.filter(d=>active.has(d.tag));
+      defList.innerHTML = items.map(d=>`<div class="def"><strong>${d.title}</strong><br><span style="color:var(--muted)">${d.text}</span></div>`).join('');
+      if(!items.length){ defList.innerHTML = `<div class="def">Activa al menos un filtro para ver definiciones.</div>`; }
+    }
+    renderDefs();
+
+    chipBtns.forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const pressed = btn.getAttribute('aria-pressed')==='true';
+        btn.setAttribute('aria-pressed', String(!pressed));
+        renderDefs();
+      });
+    });
+
+    // Scroll suave para anclas internas
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', (e)=>{
+        const id = a.getAttribute('href').slice(1);
+        const target = document.getElementById(id);
+        if(target){ e.preventDefault(); target.scrollIntoView({behavior:'smooth', block:'start'}); }
+      });
+    });
+
+    // Accesibilidad: respetar reduce motion
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      document.querySelectorAll('*').forEach(el=> el.style.scrollBehavior = 'auto');
+    }
+  </script>
+</body>
+</html>
+
